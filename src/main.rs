@@ -19,7 +19,6 @@ lazy_static! {
     static ref LETTERS: Mutex<LetterMover> = Mutex::new(LetterMover::new());
 }
 
-
 fn tick() {
     LETTERS.lock().tick();
 }

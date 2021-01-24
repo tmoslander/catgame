@@ -36,11 +36,8 @@ impl LetterMover {
 
     pub fn tick(&mut self) {
         self.clear_current();
-        self.col += self.dx;
-        self.row += self.dy;
-        for (i, x) in self.letter_columns().enumerate() {
-            plot(self.letters[i], x, self.row.a(), ColorCode::new(Color::Cyan, Color::Black));
-        }
+        self.update_location();
+        self.draw_current();
     }
 
     fn clear_current(&self) {
@@ -49,28 +46,47 @@ impl LetterMover {
         }
     }
 
+    fn update_location(&mut self) {
+        self.col += self.dx;
+        self.row += self.dy;
+    }
+
+    fn draw_current(&self) {
+        for (i, x) in self.letter_columns().enumerate() {
+            plot(self.letters[i], x, self.row.a(), ColorCode::new(Color::Cyan, Color::Black));
+        }
+    }
+
     pub fn key(&mut self, key: DecodedKey) {
         match key {
-            DecodedKey::RawKey(KeyCode::ArrowLeft) => {
+            DecodedKey::RawKey(code) => self.handle_raw(code),
+            DecodedKey::Unicode(c) => self.handle_unicode(c)
+        }
+    }
+
+    fn handle_raw(&mut self, key: KeyCode) {
+        match key {
+            KeyCode::ArrowLeft => {
                 self.dx -= 1;
             }
-            DecodedKey::RawKey(KeyCode::ArrowRight) => {
+            KeyCode::ArrowRight => {
                 self.dx += 1;
             }
-            DecodedKey::RawKey(KeyCode::ArrowUp) => {
+            KeyCode::ArrowUp => {
                 self.dy -= 1;
             }
-            DecodedKey::RawKey(KeyCode::ArrowDown) => {
+            KeyCode::ArrowDown => {
                 self.dy += 1;
             }
-            DecodedKey::Unicode(c) => {
-                if is_drawable(c) {
-                    self.letters[self.next_letter.a()] = c;
-                    self.next_letter += 1;
-                    self.num_letters = self.num_letters.saturating_add(&ModNum::new(1, self.num_letters.m()));
-                }
-            }
             _ => {}
+        }
+    }
+
+    fn handle_unicode(&mut self, key: char) {
+        if is_drawable(key) {
+            self.letters[self.next_letter.a()] = key;
+            self.next_letter += 1;
+            self.num_letters = self.num_letters.saturating_add(&ModNum::new(1, self.num_letters.m()));
         }
     }
 }
