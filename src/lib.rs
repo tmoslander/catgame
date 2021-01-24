@@ -61,7 +61,7 @@ impl LetterMover {
                 if pluggable_interrupt_os::vga_buffer::is_drawable(c) {
                     self.letters[self.next_letter.a()] = c;
                     self.next_letter += 1;
-                    self.num_letters.saturating_add(ModNum::new(1, self.num_letters.m()));
+                    self.num_letters = self.num_letters.saturating_add(ModNum::new(1, self.num_letters.m()));
                 }
             }
             _ => {}
