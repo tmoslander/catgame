@@ -1,7 +1,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use bare_metal_modulo::{ModNum, ModNumIterator};
-use pluggable_interrupt_os::vga_buffer::{BUFFER_WIDTH, BUFFER_HEIGHT, plot, ColorCode, Color};
+use pluggable_interrupt_os::vga_buffer::{BUFFER_WIDTH, BUFFER_HEIGHT, plot, ColorCode, Color, is_drawable};
 use pc_keyboard::{DecodedKey, KeyCode};
 use num::Saturating;
 
@@ -58,7 +58,7 @@ impl LetterMover {
                 self.dy += 1;
             }
             DecodedKey::Unicode(c) => {
-                if pluggable_interrupt_os::vga_buffer::is_drawable(c) {
+                if is_drawable(c) {
                     self.letters[self.next_letter.a()] = c;
                     self.next_letter += 1;
                     self.num_letters = self.num_letters.saturating_add(ModNum::new(1, self.num_letters.m()));
