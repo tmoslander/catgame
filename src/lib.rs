@@ -43,6 +43,12 @@ impl LetterMover {
         }
     }
 
+    fn clear_current(&self) {
+        for x in self.letter_columns() {
+            plot(' ', x, self.row.a(), ColorCode::new(Color::Black, Color::Black));
+        }
+    }
+
     pub fn key(&mut self, key: DecodedKey) {
         match key {
             DecodedKey::RawKey(KeyCode::ArrowLeft) => {
@@ -65,12 +71,6 @@ impl LetterMover {
                 }
             }
             _ => {}
-        }
-    }
-
-    fn clear_current(&self) {
-        for x in self.letter_columns() {
-            plot(' ', x, self.row.a(), ColorCode::new(Color::Black, Color::Black));
         }
     }
 }
