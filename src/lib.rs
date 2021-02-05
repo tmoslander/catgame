@@ -1,6 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 
-use bare_metal_modulo::{ModNum, ModNumIterator};
+use bare_metal_modulo::{ModNumC, MNum, ModNumIterator};
 use pluggable_interrupt_os::vga_buffer::{BUFFER_WIDTH, BUFFER_HEIGHT, plot, ColorCode, Color, is_drawable};
 use pc_keyboard::{DecodedKey, KeyCode};
 use num::traits::SaturatingAdd;
@@ -8,24 +8,24 @@ use num::traits::SaturatingAdd;
 #[derive(Copy,Debug,Clone,Eq,PartialEq)]
 pub struct LetterMover {
     letters: [char; BUFFER_WIDTH],
-    num_letters: ModNum<usize>,
-    next_letter: ModNum<usize>,
-    col: ModNum<usize>,
-    row: ModNum<usize>,
-    dx: ModNum<usize>,
-    dy: ModNum<usize>
+    num_letters: ModNumC<usize, BUFFER_WIDTH>,
+    next_letter: ModNumC<usize, BUFFER_WIDTH>,
+    col: ModNumC<usize, BUFFER_WIDTH>,
+    row: ModNumC<usize, BUFFER_HEIGHT>,
+    dx: ModNumC<usize, BUFFER_WIDTH>,
+    dy: ModNumC<usize, BUFFER_HEIGHT>
 }
 
 impl LetterMover {
     pub fn new() -> Self {
         LetterMover {
             letters: ['A'; BUFFER_WIDTH],
-            num_letters: ModNum::new(1, BUFFER_WIDTH),
-            next_letter: ModNum::new(1, BUFFER_WIDTH),
-            col: ModNum::new(BUFFER_WIDTH / 2, BUFFER_WIDTH),
-            row: ModNum::new(BUFFER_HEIGHT / 2, BUFFER_HEIGHT),
-            dx: ModNum::new(0, BUFFER_WIDTH),
-            dy: ModNum::new(0, BUFFER_HEIGHT)
+            num_letters: ModNumC::new(1),
+            next_letter: ModNumC::new(1),
+            col: ModNumC::new(BUFFER_WIDTH / 2),
+            row: ModNumC::new(BUFFER_HEIGHT / 2),
+            dx: ModNumC::new(0),
+            dy: ModNumC::new(0)
         }
     }
 
@@ -87,7 +87,7 @@ impl LetterMover {
         if is_drawable(key) {
             self.letters[self.next_letter.a()] = key;
             self.next_letter += 1;
-            self.num_letters = self.num_letters.saturating_add(&ModNum::new(1, self.num_letters.m()));
+            self.num_letters = self.num_letters.saturating_add(&ModNumC::new(1));
         }
     }
 }

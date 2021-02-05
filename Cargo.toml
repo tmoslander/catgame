@@ -15,7 +15,7 @@ uart_16550 = "0.2.0"
 pic8259_simple = "0.2.0"
 pc-keyboard = "0.5.0"
 pluggable_interrupt_os = "0.2.0"
-bare_metal_modulo = "0.6.0"
+bare_metal_modulo = "0.7.0"
 
 [dependencies.num]
 version = "0.3"
