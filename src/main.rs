@@ -3,28 +3,40 @@
 
 use lazy_static::lazy_static;
 use spin::Mutex;
-use pc_keyboard::DecodedKey;
-use pluggable_interrupt_template::LetterMover;
+use pc_keyboard::{DecodedKey, KeyCode};
 use pluggable_interrupt_os::HandlerTable;
 use pluggable_interrupt_os::vga_buffer::clear_screen;
+use pluggable_interrupt_template::LetterMover;
+use crossbeam::atomic::AtomicCell;
+use pluggable_interrupt_os::println;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     HandlerTable::new()
         .keyboard(key)
         .timer(tick)
-        .startup(clear_screen)
+        .startup(startup)
         .start()
 }
 
 lazy_static! {
     static ref LETTERS: Mutex<LetterMover> = Mutex::new(LetterMover::new());
+    static ref LAST_KEY: AtomicCell<Option<DecodedKey>> = AtomicCell::new(None);
 }
 
 fn tick() {
-    LETTERS.lock().tick();
+    let mut letters = LETTERS.lock();
+    match LAST_KEY.swap(None) {
+        None => {}
+        Some(key) => letters.key(key)
+    }
+    letters.tick();
 }
 
 fn key(key: DecodedKey) {
-    LETTERS.lock().key(key);
+    LAST_KEY.store(Some(key));
+}
+
+fn startup() {
+    clear_screen();
 }
