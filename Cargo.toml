@@ -14,9 +14,8 @@ x86_64 = "0.14.2"
 uart_16550 = "0.2.0"
 pic8259 = "0.10.1"
 pc-keyboard = "0.5.1"
-pluggable_interrupt_os = "0.4"
-#pluggable_interrupt_os = {git = "https://github.com/gjf2a/pluggable_interrupt_os"}
-bare_metal_modulo = "0.11.1"
+pluggable_interrupt_os = {git = "https://github.com/gjf2a/pluggable_interrupt_os"}
+bare_metal_modulo = {git = "https://github.com/gjf2a/bare_metal_modulo"}
 
 [dependencies.num]
 version = "0.3"
