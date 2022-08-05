@@ -18,7 +18,7 @@ use `LetterMover` as a starting point without modifying `main.rs` very much.
 Prior to building this example, be sure to install the following:
 * [Qemu](https://www.qemu.org/)
 * Nightly Rust:
-  * `rustup default nightly`
+  * `rustup override set nightly`
 * `llvm-tools-preview`:
   * `rustup component add llvm-tools-preview`
 * The [bootimage](https://github.com/rust-osdev/bootimage) tool:

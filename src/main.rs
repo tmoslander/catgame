@@ -8,7 +8,6 @@ use pluggable_interrupt_os::HandlerTable;
 use pluggable_interrupt_os::vga_buffer::clear_screen;
 use pluggable_interrupt_template::LetterMover;
 use crossbeam::atomic::AtomicCell;
-use pluggable_interrupt_os::println;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {

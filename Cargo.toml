@@ -1,6 +1,6 @@
 [package]
 name = "pluggable_interrupt_template"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["gjf2a <ferrer@hendrix.edu>"]
 edition = "2018"
 
@@ -10,13 +10,13 @@ edition = "2018"
 bootloader = "0.9.8"
 volatile = "0.2.6"
 spin = "0.5.2"
-x86_64 = "0.12.1"
+x86_64 = "0.14.2"
 uart_16550 = "0.2.0"
-pic8259_simple = "0.2.0"
-pc-keyboard = "0.5.0"
-#pluggable_interrupt_os = "0.2.0"
-pluggable_interrupt_os = {git = "https://github.com/gjf2a/pluggable_interrupt_os"}
-bare_metal_modulo = "0.7.0"
+pic8259 = "0.10.1"
+pc-keyboard = "0.5.1"
+pluggable_interrupt_os = "0.4"
+#pluggable_interrupt_os = {git = "https://github.com/gjf2a/pluggable_interrupt_os"}
+bare_metal_modulo = "0.11.1"
 
 [dependencies.num]
 version = "0.3"
