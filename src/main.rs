@@ -3,7 +3,7 @@
 
 use lazy_static::lazy_static;
 use spin::Mutex;
-use pc_keyboard::{DecodedKey, KeyCode};
+use pc_keyboard::DecodedKey;
 use pluggable_interrupt_os::HandlerTable;
 use pluggable_interrupt_os::vga_buffer::clear_screen;
 use pluggable_interrupt_template::LetterMover;
@@ -25,10 +25,7 @@ lazy_static! {
 
 fn tick() {
     let mut letters = LETTERS.lock();
-    match LAST_KEY.swap(None) {
-        None => {}
-        Some(key) => letters.key(key)
-    }
+    LAST_KEY.swap(None).map(|key| letters.key(key));
     letters.tick();
 }
 
