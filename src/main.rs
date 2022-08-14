@@ -28,7 +28,6 @@ fn cpu_loop() -> ! {
     let mut last_tick = 0;
     kernel.tick();
     loop {
-        //LAST_KEY.swap(None).map(|key| kernel.key(key));
         if let Some(key) = LAST_KEY.load() {
             LAST_KEY.store(None);
             kernel.key(key);
