@@ -26,8 +26,7 @@ lazy_static! {
 fn cpu_loop() -> ! {
     let mut kernel = LetterMover::new();
     let mut last_tick = 0;
-    kernel.tick();
-    loop {
+R    loop {
         if let Some(key) = LAST_KEY.load() {
             LAST_KEY.store(None);
             kernel.key(key);
