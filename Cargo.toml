@@ -14,16 +14,12 @@ x86_64 = "0.14.2"
 uart_16550 = "0.2.0"
 pic8259 = "0.10.1"
 pc-keyboard = "0.5.1"
-pluggable_interrupt_os = {git = "https://github.com/gjf2a/pluggable_interrupt_os"}
+pluggable_interrupt_os = "0.4"
 bare_metal_modulo = "1"
 
 [dependencies.num]
 version = "0.3"
 default-features = false
-
-[dependencies.lazy_static]
-version = "1.0"
-features = ["spin_no_std"]
 
 [dependencies.crossbeam]
 version = "0.8"
