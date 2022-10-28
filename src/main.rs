@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-use lazy_static::lazy_static;
 use pc_keyboard::DecodedKey;
 use pluggable_interrupt_os::HandlerTable;
 use pluggable_interrupt_os::vga_buffer::clear_screen;
@@ -18,10 +17,8 @@ pub extern "C" fn _start() -> ! {
         .start()
 }
 
-lazy_static! {
-    static ref LAST_KEY: AtomicCell<Option<DecodedKey>> = AtomicCell::new(None);
-    static ref TICKS: AtomicCell<usize> = AtomicCell::new(0);
-}
+static LAST_KEY: AtomicCell<Option<DecodedKey>> = AtomicCell::new(None);
+static TICKS: AtomicCell<usize> = AtomicCell::new(0);
 
 fn cpu_loop() -> ! {
     let mut kernel = LetterMover::new();
