@@ -1,93 +1,74 @@
-#![cfg_attr(not(test), no_std)]
+#![no_std]
+#![no_main]
 
-use bare_metal_modulo::{ModNumC, MNum, ModNumIterator};
-use pluggable_interrupt_os::vga_buffer::{BUFFER_WIDTH, BUFFER_HEIGHT, plot, ColorCode, Color, is_drawable};
-use pc_keyboard::{DecodedKey, KeyCode};
-use num::traits::SaturatingAdd;
+use pc_keyboard::DecodedKey;
+use pluggable_interrupt_os::HandlerTable;
+use pluggable_interrupt_os::vga_buffer::clear_screen;
+use catgame::LetterMover;
+use crossbeam::atomic::AtomicCell;
 
-#[derive(Copy,Debug,Clone,Eq,PartialEq)]
-pub struct LetterMover {
-    letters: [char; BUFFER_WIDTH],
-    num_letters: ModNumC<usize, BUFFER_WIDTH>,
-    next_letter: ModNumC<usize, BUFFER_WIDTH>,
-    col: ModNumC<usize, BUFFER_WIDTH>,
-    row: ModNumC<usize, BUFFER_HEIGHT>,
-    dx: ModNumC<usize, BUFFER_WIDTH>,
-    dy: ModNumC<usize, BUFFER_HEIGHT>
+const GameHeight: usize = BUFFER_HEIGHT-2;
+const HeaderSpace: usize = BUFFER_HEIGHT - GameHeight;
+
+const Dog_Colors : [Color; 2] = [Color::Grey, Color::Brown];
+
+pub type MainGame = catgame<BUFFER_WIDTH, GameHeight>;
+
+pub fn tick(game: &mut MainGame){
+    if game.countdown_complete(){
+        game.update();
+        draw(game);
+    }
 }
 
-impl LetterMover {
-    pub fn new() -> Self {
-        LetterMover {
-            letters: ['A'; BUFFER_WIDTH],
-            num_letters: ModNumC::new(1),
-            next_letter: ModNumC::new(1),
-            col: ModNumC::new(BUFFER_WIDTH / 2),
-            row: ModNumC::new(BUFFER_HEIGHT / 2),
-            dx: ModNumC::new(0),
-            dy: ModNumC::new(0)
-        }
-    }
+fn draw(game: &mut MainGame){
+    draw_header(game);
+    draw_board(game);
+}
 
-    fn letter_columns(&self) -> impl Iterator<Item=usize> {
-        ModNumIterator::new(self.col)
-            .take(self.num_letters.a())
-            .map(|m| m.a())
-    }
+fn draw_header(game: &MainGame){
+    let header_color = ColorCode::new(Color::White, Color::Black);
+    let score_text = "Score: ";
+    clear_row(0, Color::Black);
+    clear_row(1, Color::Black);
+    plot_str(score_text, 0,0,header_color);
+    plot_num(game.score() as isize, score_text.len()+ 1, 0, header_color);
+}
 
-    pub fn tick(&mut self) {
-        self.clear_current();
-        self.update_location();
-        self.draw_current();
-    }
+fn draw_subheader(subheader: &str) {
+    plot_str(subheader, 0 , 1, ColorCode::new(Color::LightBlue, Color::Black));
+}
 
-    fn clear_current(&self) {
-        for x in self.letter_columns() {
-            plot(' ', x, self.row.a(), ColorCode::new(Color::Black, Color::Black));
-        }
-    }
+fn draw_game_over(game: &MainGame){
+    draw_normal_header(game);
+    draw_subheader("Game Over. Press S to restart.");
+}
 
-    fn update_location(&mut self) {
-        self.col += self.dx;
-        self.row += self.dy;
+fn draw_board(game: &MainGame){
+    for p in game.cell_pos_iter(){
+        let (row,col) = p.row_col();
+        let (c, color) = get_icon_color(game.p, &game.cell(p));
+        plot(c,col,row+ HeaderSpace, color);
     }
+}
 
-    fn draw_current(&self) {
-        for (i, x) in self.letter_columns().enumerate() {
-            plot(self.letters[i], x, self.row.a(), ColorCode::new(Color::Cyan, Color::Black));
-        }
-    }
-
-    pub fn key(&mut self, key: DecodedKey) {
-        match key {
-            DecodedKey::RawKey(code) => self.handle_raw(code),
-            DecodedKey::Unicode(c) => self.handle_unicode(c)
-        }
-    }
-
-    fn handle_raw(&mut self, key: KeyCode) {
-        match key {
-            KeyCode::ArrowLeft => {
-                self.dx -= 1;
+fn get_icon_color(game: &MainGame, p:Position<BUFFER_WIDTH, GameHeight>, cell:&Cell)-> (char,ColorCode){
+    let (icon, foreground) =
+    if p == game.dog_at(){
+        (match game.status(){
+            Status::Over => '%',
+            _ => game.cat_icon()
+        }, Color::Orange)
+    }else{
+        if let Some((d, Dog)) = game.dog_at(p){
+            (Dog.icon(), Dog_Colors[d])
+        }else{
+            match cell{
+                Cell::Fish => ('f', Color::Grey),
+                Cell::Empty => (' ', Color::Black),
+                Cell::Wall => ('#', Color::Green),
             }
-            KeyCode::ArrowRight => {
-                self.dx += 1;
-            }
-            KeyCode::ArrowUp => {
-                self.dy -= 1;
-            }
-            KeyCode::ArrowDown => {
-                self.dy += 1;
-            }
-            _ => {}
         }
-    }
-
-    fn handle_unicode(&mut self, key: char) {
-        if is_drawable(key) {
-            self.letters[self.next_letter.a()] = key;
-            self.next_letter += 1;
-            self.num_letters = self.num_letters.saturating_add(&ModNumC::new(1));
-        }
-    }
+    };
+    (icon, ColorCode::new(foreground, Color::Black))
 }
