@@ -1,22 +1,76 @@
-use pluggable_interrupt_os::vga_buffer::(BUFFER_HEIGHT, BUFFER_WIDTH)
+use pluggable_interrupt_os::vga_buffer::{BUFFER_HEIGHT, BUFFER_WIDTH};
+//#[allow(incomplete_features)]
+//use core::prelude::rust_2024::derive;
 
+pub struct CatGame<const WIDTH: usize, const HEIGHT: usize> {
+    cells: [[Cell; WIDTH]; HEIGHT],
+    cat: Cat<WIDTH,HEIGHT>,
+    dogs: [Dog<WIDTH,HEIGHT>; 2],
+    status: Status,
+    fish_eaten: u32,
+    countdown: usize,
+    last_key: Option<Dir>
+}
 
 enum Dir{
     N,S,E,W
 }
 
-Impl Dir{
+impl Dir{
+
+    fn icon(&self) -> char {
+        match self {
+            Dir::N | Dir::S | Dir::E | Dir::W => 'C'
+        }
+    }
+
     fn reverse(&self) -> Dir{
         match self{
-            Dir::N => Dir::S
-            Dir::S => Dir::N
-            Dir::E => Dir::W
+            Dir::N => Dir::S,
+            Dir::S => Dir::N,
+            Dir::E => Dir::W,
             Dir::W => Dir::E
+        }
+    }
+
+    fn left(&self) -> Dir {
+        match self {
+            Dir::N => Dir::W,
+            Dir::S => Dir::E,
+            Dir::E => Dir::N,
+            Dir::W => Dir::S
+        }
+    }
+
+    fn right(&self) -> Dir {
+        match self {
+            Dir::N => Dir::E,
+            Dir::S => Dir::W,
+            Dir::E => Dir::S,
+            Dir::W => Dir::N
         }
     }
 }
 
-#![derive(Debug, Copy, Clone, Eq, PartialEq)]
+impl From<char> for Dir {
+    fn from(icon: char) -> Self {
+        match icon {
+            'C' => Dir::S,
+            'C' => Dir::N,
+            'C' => Dir::W,
+            'C' => Dir::E,
+            _ => panic!("Illegal icon: '{}'", icon)
+        }
+    }
+}
+
+pub enum Cell {
+    Fish,
+    Empty,
+    Wall
+}
+
+//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Position<const WIDTH: usize, const HEIGHT: usize>{
     col: i16, row: i16
 }
@@ -25,51 +79,82 @@ impl <const WIDTH: usize, const HEIGHT: usize> Position<WIDTH, HEIGHT>{
     pub fn is_legal(&self) -> bool{
         0<= self.col && self.col < WIDTH as i16 && 0<= self.row && self.row < HEIGHT as i16
     }
-    pub fn row_col -> (usize, usize){
+    pub fn row_col(&self) -> (usize, usize){
         (self.row as usize, self.col as usize)
     }
 }
 
 
-#![derive(Debug, Copy, Clone, Eq, PartialEq)]
-struct cat<const WIDTH:usize, const HEIGHT: usize>{
-    pos: Position<WIDTH, HEIGHT>, open:bool
+//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+struct Cat<const WIDTH: usize, const HEIGHT: usize>{
+    pos: Position<WIDTH, HEIGHT>, dir: Dir, open: bool
 }
 
-impl <const WIDTH:usize, const HEIGHT: usize>{
+impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
     fn new(pos: Position<WIDTH, HEIGHT>, icon:char) -> Self{
-        cat{pos, open:true}
+        Cat {pos, dir: Dir::from(icon), open: true}
     }
 
-    fn tick(&mut self){
+    fn tick(&mut self) {
         self.open = !self.open;
     }
     fn icon(&self) -> char{
-            self.icon = "C"
+        match self.dir {
+            Dir::N | Dir::S | Dir::E | Dir::W => 'C'
+        }
     }
 }
 
 
-#![derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct dog<const WIDTH: usize, const HEIGHT: usize>{
-    pos: Position<WIDTH,HEIGHT>, active:bool
+//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct Dog<const WIDTH: usize, const HEIGHT: usize>{
+    pos: Position<WIDTH,HEIGHT>, dir: Dir, active: bool
 }
 // need to make it so that the dogs move around in the game
 
-pub fn icon(&self) -> char {
-    if self.active{'D'}
-    else {'d'}
+impl <const WIDTH: usize, const HEIGHT: usize> Dog<WIDTH,HEIGHT> {
+    fn on_my_left(&self, other: Position<WIDTH,HEIGHT>) -> bool {
+        let offset = self.pos - other;
+        match self.dir {
+            Dir::N => offset.col > 0,
+            Dir::S => offset.col < 0,
+            Dir::E => offset.row > 0,
+            Dir::W => offset.row < 0
+        }
+    }
+
+    fn ahead_or_behind(&self, other: Position<WIDTH,HEIGHT>) -> bool {
+        let offset = self.pos - other;
+        match self.dir {
+            Dir::N | Dir::S => offset.col == 0,
+            Dir::E | Dir::W => offset.row == 0
+        }
+    }
+
+    fn on_my_right(&self, other: Position<WIDTH,HEIGHT>) -> bool {
+        !self.on_my_left(other) && !self.ahead_or_behind(other)
+    }
+
+    fn go(&mut self, ahead: Cell, left: Cell, right: Cell, cat_pos: Position<WIDTH,HEIGHT>) {
+        if self.active {
+            if left == Cell::Wall && ahead == Cell::Wall && right == Cell::Wall {
+                self.dir = self.dir.reverse();
+            } else if left != Cell::Wall && (self.on_my_left(cat_pos) || ahead == Cell::Wall) {
+                self.dir = self.dir.left();
+            } else if right != Cell::Wall && (self.on_my_right(cat_pos) || ahead == Cell::Wall) {
+                self.dir = self.dir.right();
+            }
+            self.pos = self.pos.neighbor(self.dir);
+        }
+    }
+
+    pub fn icon(&self) -> char {
+        'D'
+    }
+
 }
 
-fn squash(&mut self){
-    self.active =false;
-}
-
-fn revive(&mut self){
-    self.active = true;
-}
-
-#![derive(Debug, Copy, Clone, Eq, PartialEq)]
+//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Status{
     Normal,
     Over
