@@ -4,7 +4,7 @@
 use pc_keyboard::DecodedKey;
 use pluggable_interrupt_os::HandlerTable;
 use pluggable_interrupt_os::vga_buffer::clear_screen;
-use pluggable_interrupt_template::LetterMover;
+use catgame::LetterMover;
 use crossbeam::atomic::AtomicCell;
 
 #[no_mangle]
