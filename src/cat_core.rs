@@ -1,4 +1,8 @@
 use pluggable_interrupt_os::vga_buffer::{BUFFER_HEIGHT, BUFFER_WIDTH};
+use core::ops::{Add,Sub};
+use pc_keyboard::{DecodedKey, KeyCode};
+
+const UPDATE_FREQUENCY: usize = 3;
 //#[allow(incomplete_features)]
 //use core::prelude::rust_2024::derive;
 
@@ -164,9 +168,9 @@ pub enum Status{
 
 impl<const WIDTH:usize, const HEIGHT: usize> catgame<WIDTH, HEIGHT>{
     pub fn new() -> Self{
-        let mut game = catgame{
-            Cat : cat::new(Position {col: 0, row: 0}),
-            dogs : [dog{pos: Position {col:0, row: 0}, active: true}; 2],
+        let mut game = CatGame{
+            cat : Cat::new(Position {col: 0, row: 0}),
+            dogs : [Dog{pos: Position {col:0, row: 0}, active: true}; 2],
             fish_eaten: 0,
             countdown: UPDATE_FREQUENCY, last_key: None, status: Status::Normal
         };
