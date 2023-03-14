@@ -1,6 +1,21 @@
 use pluggable_interrupt_os::vga_buffer::(BUFFER_HEIGHT, BUFFER_WIDTH)
 
 
+enum Dir{
+    N,S,E,W
+}
+
+Impl Dir{
+    fn reverse(&self) -> Dir{
+        match self{
+            Dir::N => Dir::S
+            Dir::S => Dir::N
+            Dir::E => Dir::W
+            Dir::W => Dir::E
+        }
+    }
+}
+
 #![derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Position<const WIDTH: usize, const HEIGHT: usize>{
     col: i16, row: i16
