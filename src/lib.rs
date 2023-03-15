@@ -1,10 +1,11 @@
 #![no_std]
 #![no_main]
 
-use pc_keyboard::DecodedKey;
-use pluggable_interrupt_os::HandlerTable;
+use cat_core::Cell;
+use cat_core::Position;
+use cat_core::Status;
+use cat_core::CatGame;
 use pluggable_interrupt_os::vga_buffer::*;
-use crossbeam::atomic::AtomicCell;
 mod cat_core;
 
 const GameHeight: usize = BUFFER_HEIGHT-2;
@@ -47,12 +48,12 @@ fn draw_game_over(game: &MainGame){
 fn draw_board(game: &MainGame){
     for p in game.cell_pos_iter(){
         let (row,col) = p.row_col();
-        let (c, color) = get_icon_color(game.p, &game.cell(p));
+        let (c, color) = get_icon_color(game, game.p, &game.cell(p));
         plot(c,col, row + HeaderSpace, color);
     }
 }
 
-fn get_icon_color(game: &MainGame, p:Position<BUFFER_WIDTH, GameHeight>, cell:&Cell)-> (char,ColorCode){
+fn get_icon_color(game: &MainGame, p: Position<BUFFER_WIDTH, GameHeight>, cell: &Cell)-> (char,ColorCode){
     let (icon, foreground) =
     if p == game.dog_at(){
         (match game.status(){
@@ -60,7 +61,7 @@ fn get_icon_color(game: &MainGame, p:Position<BUFFER_WIDTH, GameHeight>, cell:&C
             _ => game.cat_icon()
         }, Color::Yellow)
     }else{
-        if let Some((d, Dog)) = game.dog_at(p){
+        if let Some((d, Dog)) = game.dog_at(){
             (Dog.icon(), Dog_Colors[d])
         }else{
             match cell{

@@ -1,11 +1,9 @@
-use pluggable_interrupt_os::vga_buffer::{BUFFER_HEIGHT, BUFFER_WIDTH};
 use core::ops::{Add,Sub};
 use pc_keyboard::{DecodedKey, KeyCode};
 
 const UPDATE_FREQUENCY: usize = 3;
-//#[allow(incomplete_features)]
-//use core::prelude::rust_2024::derive;
 
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct CatGame<const WIDTH: usize, const HEIGHT: usize> {
     cells: [[Cell; WIDTH]; HEIGHT],
     cat: Cat<WIDTH,HEIGHT>,
@@ -15,7 +13,7 @@ pub struct CatGame<const WIDTH: usize, const HEIGHT: usize> {
     countdown: usize,
     last_key: Option<Dir>
 }
-
+#[derive(Clone, Copy, Eq, PartialEq)]
 enum Dir{
     N,S,E,W
 }
@@ -67,14 +65,14 @@ impl From<char> for Dir {
         }
     }
 }
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum Cell {
     Fish,
     Empty,
     Wall
 }
 
-//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct Position<const WIDTH: usize, const HEIGHT: usize>{
     col: i16, row: i16
 }
@@ -135,7 +133,7 @@ impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
 }
 
 
-//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct Dog<const WIDTH: usize, const HEIGHT: usize>{
     pos: Position<WIDTH,HEIGHT>, dir: Dir, active: bool
 }
@@ -193,9 +191,9 @@ pub enum Status{
 impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn new() -> Self{
         let mut game = CatGame{
-            cells: 
-            cat : Cat::new(Position{col: 0, row: 0},cat_icon()),
-            dogs : [Dog{pos: Position {col:0, row: 0}, active: true, dir: DOG_START_DIR}; 2],
+            cells: [[Cell::Empty; WIDTH]; HEIGHT],
+            cat : Cat::new(Position{col: 0, row: 0},), //Need to put the icon there
+            dogs : [Dog{pos: Position {col:0, row: 0}, active: true, dir: Dir::E}; 2],
             fish_eaten: 0,
             countdown: UPDATE_FREQUENCY, last_key: None, status: Status::Normal
         };
@@ -222,7 +220,10 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
 
     fn translate_icon(&mut self, dog : &mut usize, row: usize, col: usize, icon:char){
         match icon{
-              //match # to wall, f to fish, D to dog and c to cat, _ to panic
+                '#' => Cell::Wall,
+                'f' => Cell::Fish,
+                ' ' => Cell::Empty,
+                _ => panic!()
                 }                
     }
 
@@ -238,7 +239,7 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn cat_icon(&self) -> char{
         self.cat.icon()
     }
-    pub fn dog_at(&self) -> Postion<WIDTH,HEIGHT>{
+    pub fn dog_at(&self) -> Position<WIDTH,HEIGHT>{
         self.dogs.iter().enumerate().find(|(_,dog)| dog.pos == p)
     }
     pub fn update(&mut self){
@@ -260,7 +261,7 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     fn resolve_dog_collision(&mut self, d:usize){
         if self.dogs[d].pos == self.cat.pos && self.dogs[d].active{
             match self.status{
-                Status::Normal => self.status = Status.Over,
+                Status::Normal => self.status = Status::Over,
                 Status::Over => {}
             }
         }
@@ -375,27 +376,27 @@ const DOG_START_DIR: [Dir; 2] = [Dir::E, Dir::W];
 
 const START: &'static str =
     "################################################################################
-     #.........D....................................................................#
-     #.#################.##.##.###.####.#.##############.##.##.##.##.################
-     #.#################.##.##.###.####.#.##############.##.##.##.##.################
-     #.#################.##.##.###.####.#.##############.##.##.##.##.################
-     #..............................................................................#
-     ###.####.#####.######.####.#.#.#######.#.####.####.#.######.#.####.###.###.##.##
-     ###.####.#####.######.####.#.#.#######.#.####.####.#.######.#.####.###.###.##.##
-     ###.####.#####.######.####.#.#.#######.#.####.####.#.######.#.####.###.###.##.##
-     ###.####.#####.######.####.#.#.#######.#.####.####.#.######.#.####.###.###.##.##
-     #......................................C.......................................#
-     #####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.##
-     #####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.##
-     #####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.##
-     #####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.##
-     #####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.##
-     #####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.#####.##
-     #....................................................................f.........#
-     ####.####.####.####.####.####.####.####.####.####.####.####.####.####.####.##.##
-     ####.####.####.####.####.####.####.####.####.####.####.####.####.####.####.##.##
-     ####.####.####.####.####.####.####.####.####.####.####.####.####.####.####.##.##
-     #......................................................................D.......#
+     #         D                                                                    #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                      C                                       #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                    f         #
+     #                                                                              #
+     #                                                                              #
+     #                                                                              #
+     #                                                                      D       #
      ################################################################################";
 
 // need to match keys to directions being moved, maybe need dir after all without the icon matching.
