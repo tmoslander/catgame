@@ -3,16 +3,16 @@
 
 use pc_keyboard::DecodedKey;
 use pluggable_interrupt_os::HandlerTable;
-use pluggable_interrupt_os::vga_buffer::clear_screen;
-use catgame::LetterMover;
+use pluggable_interrupt_os::vga_buffer::*;
 use crossbeam::atomic::AtomicCell;
+mod cat_core;
 
 const GameHeight: usize = BUFFER_HEIGHT-2;
 const HeaderSpace: usize = BUFFER_HEIGHT - GameHeight;
 
-const Dog_Colors : [Color; 2] = [Color::Grey, Color::Brown];
+const Dog_Colors : [Color; 2] = [Color::LightGray, Color::Brown];
 
-pub type MainGame = catgame<BUFFER_WIDTH, GameHeight>;
+pub type MainGame = CatGame<BUFFER_WIDTH, GameHeight>;
 
 pub fn tick(game: &mut MainGame){
     if game.countdown_complete(){
@@ -40,7 +40,7 @@ fn draw_subheader(subheader: &str) {
 }
 
 fn draw_game_over(game: &MainGame){
-    draw_normal_header(game);
+    draw_header(game);
     draw_subheader("Game Over. Press S to restart.");
 }
 
@@ -48,7 +48,7 @@ fn draw_board(game: &MainGame){
     for p in game.cell_pos_iter(){
         let (row,col) = p.row_col();
         let (c, color) = get_icon_color(game.p, &game.cell(p));
-        plot(c,col,row+ HeaderSpace, color);
+        plot(c,col, row + HeaderSpace, color);
     }
 }
 
@@ -58,13 +58,13 @@ fn get_icon_color(game: &MainGame, p:Position<BUFFER_WIDTH, GameHeight>, cell:&C
         (match game.status(){
             Status::Over => '%',
             _ => game.cat_icon()
-        }, Color::Orange)
+        }, Color::Yellow)
     }else{
         if let Some((d, Dog)) = game.dog_at(p){
             (Dog.icon(), Dog_Colors[d])
         }else{
             match cell{
-                Cell::Fish => ('f', Color::Grey),
+                Cell::Fish => ('f', Color::LightBlue),
                 Cell::Empty => (' ', Color::Black),
                 Cell::Wall => ('#', Color::Green),
             }

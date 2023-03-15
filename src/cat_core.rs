@@ -67,7 +67,7 @@ impl From<char> for Dir {
         }
     }
 }
-
+#[derive(PartialEq)]
 pub enum Cell {
     Fish,
     Empty,
@@ -140,7 +140,6 @@ pub struct Dog<const WIDTH: usize, const HEIGHT: usize>{
     pos: Position<WIDTH,HEIGHT>, dir: Dir, active: bool
 }
 // need to make it so that the dogs move around in the game
-
 impl <const WIDTH: usize, const HEIGHT: usize> Dog<WIDTH,HEIGHT> {
     fn on_my_left(&self, other: Position<WIDTH,HEIGHT>) -> bool {
         let offset = self.pos - other;
@@ -194,8 +193,9 @@ pub enum Status{
 impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn new() -> Self{
         let mut game = CatGame{
-            cat : Cat::new(Position {col: 0, row: 0}),
-            dogs : [Dog{pos: Position {col:0, row: 0}, active: true}; 2],
+            cells: 
+            cat : Cat::new(Position{col: 0, row: 0},cat_icon()),
+            dogs : [Dog{pos: Position {col:0, row: 0}, active: true, dir: DOG_START_DIR}; 2],
             fish_eaten: 0,
             countdown: UPDATE_FREQUENCY, last_key: None, status: Status::Normal
         };
@@ -320,6 +320,7 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
                 self.fish_eaten += 1;
                 self.cells[row][col] = Cell::Empty;
             }
+            _ => {}
         }
     }
 
