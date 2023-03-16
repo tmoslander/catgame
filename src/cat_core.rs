@@ -239,8 +239,8 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     /* pub fn cat_icon(&self) -> char{
         self.cat.icon()
     } */
-    pub fn dog_at(&self, p: Position<WIDTH,HEIGHT>) -> Option<(usize,&Dog<WIDTH,HEIGHT>)>{
-        self.dogs.iter().enumerate().find(|(_,dog)| dog.pos == p)
+    pub fn dog_at(&self, p: Position<WIDTH,HEIGHT>) -> /* Option<(usize,&Dog<WIDTH,HEIGHT>)> */ Position<WIDTH,HEIGHT>{
+        self.dogs.iter().enumerate().find(self.dog.pos == p)
     }
     pub fn update(&mut self){
         self.last_key = None;
