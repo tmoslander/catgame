@@ -36,7 +36,7 @@ fn draw_header(game: &MainGame){
 }
 
 fn draw_subheader(subheader: &str){
-    plot_str(subheader, 0, 1, ColorCode::new(Color::LightBlue, Color::Black));
+    plot_str(subheader, 0, 1, ColorCode::new(Color::Black, Color::Green));
 }
 
 fn draw_normal_header(game: &MainGame){
@@ -49,7 +49,6 @@ fn draw_normal_header(game: &MainGame){
 }
 
 fn draw_game_over(game: &MainGame){
-    draw_header(game);
     draw_subheader("Game Over. Press S to restart.");
 }
 

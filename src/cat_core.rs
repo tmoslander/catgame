@@ -20,12 +20,6 @@ pub enum Dir{
 
 impl Dir{
 
-    /* fn icon(&self) -> char {
-        match self {
-            Dir::N | Dir::S | Dir::E | Dir::W => 'C'
-        }
-    } */
-
     fn reverse(&self) -> Dir{
         match self{
             Dir::N => Dir::S,
@@ -54,17 +48,6 @@ impl Dir{
     }
 }
 
-/* impl From<char> for Dir {
-    fn from(icon: char) -> Self {
-        match icon {
-            'C' => Dir::S,
-            'C' => Dir::N,
-            'C' => Dir::W,
-            'C' => Dir::E,
-            _ => panic!("Illegal icon: '{}'", icon)
-        }
-    }
-} */
 #[derive(PartialEq, Clone, Copy, Eq)]
 pub enum Cell {
     Fish,
@@ -96,7 +79,7 @@ impl <const WIDTH: usize, const HEIGHT: usize> Sub for Position<WIDTH,HEIGHT> {
 
 impl <const WIDTH: usize, const HEIGHT: usize> Position<WIDTH, HEIGHT>{
     pub fn is_legal(&self) -> bool{
-        0<= self.col && self.col < WIDTH as i16 && 0<= self.row && self.row < HEIGHT as i16
+        (0 <= self.col && self.col < WIDTH as i16) && 0 <= self.row && self.row < HEIGHT as i16
     }
     pub fn row_col(&self) -> (usize, usize){
         (self.row as usize, self.col as usize)
@@ -118,17 +101,12 @@ pub struct Cat<const WIDTH: usize, const HEIGHT: usize>{
 }
 
 impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
-    pub fn new(pos: Position<WIDTH, HEIGHT>) -> Self{
+    fn new(pos: Position<WIDTH, HEIGHT>) -> Self{
         Cat {pos, dir: Dir::N}
     }
 
-    pub fn tick(&mut self) {
+    fn tick(&mut self) {
     }
-    /* pub fn icon(&self) -> char{
-        match self.dir {
-            Dir::N | Dir::S | Dir::E | Dir::W => 'C'
-        }
-    } */
 }
 
 
@@ -136,7 +114,6 @@ impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
 pub struct Dog<const WIDTH: usize, const HEIGHT: usize>{
     pos: Position<WIDTH,HEIGHT>, dir: Dir, active: bool
 }
-// need to make it so that the dogs move around in the game
 impl <const WIDTH: usize, const HEIGHT: usize> Dog<WIDTH,HEIGHT> {
     fn on_my_left(&self, other: Position<WIDTH,HEIGHT>) -> bool {
         let offset = self.pos - other;
@@ -173,13 +150,9 @@ impl <const WIDTH: usize, const HEIGHT: usize> Dog<WIDTH,HEIGHT> {
         }
     }
 
-    /* pub fn icon(&self) -> char {
-        'D'
-    } */
-
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive (Copy, Clone, Eq, PartialEq)]
 pub enum Status{
     Normal,
     Over
@@ -191,10 +164,11 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn new() -> Self{
         let mut game = CatGame{
             cells: [[Cell::Empty; WIDTH]; HEIGHT],
-            cat : Cat::new(Position{col: 0, row: 0}), //Need to put the icon there
+            cat : Cat::new(Position{col: 0, row: 0}),
             dogs : [Dog{pos: Position {col:0, row: 0}, active: true, dir: Dir::E}; 2],
             fish_eaten: 0,
-            countdown: UPDATE_FREQUENCY, last_key: None, status: Status::Normal
+            countdown: UPDATE_FREQUENCY, last_key: None, 
+            status: Status::Normal
         };
         game.reset();
         game
@@ -208,7 +182,7 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
             }
         }
         assert_eq!(dog, 2);
-        self.status = Status::Normal;
+        self.status = Status::Normal; //fails horribly when changed to Status::Over here for some reason, the correct screen isn't drawn at all
         self.fish_eaten = 0;
         self.last_key = None;
     }
@@ -222,11 +196,14 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
                 '#' => self.cells[row][col] = Cell::Wall,
                 'f' => self.cells[row][col] = Cell::Fish,
                 ' ' => self.cells[row][col] = Cell::Empty,
-                'D' => {let dir = DOG_START_DIR[*dog];
+                'D' => {
+                    let dir = DOG_START_DIR[*dog];
                     self.dogs[*dog] = Dog{pos: Position{row:row as i16, col:col as i16}, dir, active:true};
                     *dog += 1
                 },
-                'C' => {self.cat = Cat::new(Position{row: row as i16, col: col as i16});}
+                'C' => {
+                    self.cat = Cat::new(Position{row: row as i16, col: col as i16});
+                },
                 _ => panic!()
                 }                
     }
@@ -255,14 +232,12 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
             self.resolve_dog_collision(d);
             self.dogs[d].go(ahead, left, right, self.cat_at());
             self.resolve_dog_collision(d);
-            // make it so that the dogs randomly wander (Ferrer question)
-            self.resolve_dog_collision(d);
             }
         }
     fn resolve_dog_collision(&mut self, d:usize){
         if self.dogs[d].pos == self.cat.pos && self.dogs[d].active{
-            match self.status{
-                Status::Normal => self.status = Status::Over,
+            match self.status(){
+                Status::Normal => {self.status = Status::Over},
                 Status::Over => {}
             }
         }
@@ -321,7 +296,7 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
             Cell::Fish => {
                 self.fish_eaten += 1;
                 self.cells[row][col] = Cell::Empty;
-            }
+            },
             _ => {}
         }
     }
@@ -377,17 +352,17 @@ const DOG_START_DIR: [Dir; 2] = [Dir::E, Dir::W];
 
 const START: &'static str =
     "################################################################################
+     #                                                                              #
      #         D                                                                    #
      #                                                                              #
-     #                                                                              #
-     #                                                                              #
-     #                                                                              #
+     #                                                            f                 #
+     #        f                                                                     #
      #                                                                              #
      #                                                                              #
      #                                                                              #
      #                                                                              #
      #                                      C                                       #
-     #                                                                              #
+     #                        f                                                     #
      #                                                                              #
      #                                                                              #
      #                                                                              #
@@ -396,7 +371,7 @@ const START: &'static str =
      #                                                                    f         #
      #                                                                              #
      #                                                                              #
-     #                                                                              #
+     #        f                                                                     #
      #                                                                      D       #
      ################################################################################";
 
