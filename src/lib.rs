@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 
+//Citation: Referenced ghost_hunter_core, ghost_hunter
+
 use cat_core::Cell;
 use cat_core::Position;
 use cat_core::Status;
@@ -12,7 +14,7 @@ pub mod cat_core;
 const GAME_HEIGHT: usize = BUFFER_HEIGHT-2;
 const HEADER_SPACE: usize = BUFFER_HEIGHT - GAME_HEIGHT;
  
-const DOG_COLORS : [Color; 2] = [Color::LightGray, Color::Brown];
+const DOG_COLORS : [Color; 2] = [Color::LightCyan, Color::Brown];
 
 pub type MainGame = CatGame<BUFFER_WIDTH, GAME_HEIGHT>;
 
@@ -31,7 +33,7 @@ fn draw(game: &MainGame){
 fn draw_header(game: &MainGame){
     match game.status(){
         Status::Normal => draw_normal_header(game),
-        Status::Over => draw_game_over(game)
+        Status::Over => draw_game_over()
     }
 }
 
@@ -48,7 +50,7 @@ fn draw_normal_header(game: &MainGame){
     plot_num(game.score() as isize, score_text.len()+ 1, 0, header_color);
 }
 
-fn draw_game_over(game: &MainGame){
+fn draw_game_over(){
     draw_subheader("Game Over. Press S to restart.");
 }
 
@@ -72,7 +74,7 @@ fn get_icon_color(game: &MainGame, p: Position<BUFFER_WIDTH, GAME_HEIGHT>, cell:
             ('D', DOG_COLORS[d])
         }else{
             match cell{
-                Cell::Fish => ('f', Color::LightBlue),
+                Cell::Fish => ('f', Color::LightGray),
                 Cell::Empty => (' ', Color::Black),
                 Cell::Wall => ('#', Color::Green),
             }

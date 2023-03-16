@@ -2,8 +2,7 @@
 #![no_main]
 
 mod cat_core;
-use catgame::{MainGame, cat_core::Cat};
-use cat_core::CatGame;
+use catgame::{MainGame};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use pluggable_interrupt_os::HandlerTable;
