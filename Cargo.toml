@@ -15,6 +15,7 @@ uart_16550 = "0.2.0"
 pic8259 = "0.10.1"
 pc-keyboard = "0.5.1"
 pluggable_interrupt_os = "0.4"
+lazy_static = "1.4.0"
 bare_metal_modulo = "1"
 
 [dependencies.num]

@@ -14,7 +14,7 @@ pub struct CatGame<const WIDTH: usize, const HEIGHT: usize> {
     last_key: Option<Dir>
 }
 #[derive(Clone, Copy, Eq, PartialEq)]
-enum Dir{
+pub enum Dir{
     N,S,E,W
 }
 
@@ -122,9 +122,8 @@ impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
         Cat {pos, dir: Dir::N}
     }
 
-    /*fn tick(&mut self) {
-        self.open = !self.open;
-    }*/
+    fn tick(&mut self) {
+    }
     /* pub fn icon(&self) -> char{
         match self.dir {
             Dir::N | Dir::S | Dir::E | Dir::W => 'C'
@@ -223,6 +222,11 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
                 '#' => self.cells[row][col] = Cell::Wall,
                 'f' => self.cells[row][col] = Cell::Fish,
                 ' ' => self.cells[row][col] = Cell::Empty,
+                'D' => {let dir = DOG_START_DIR[*dog];
+                    self.dogs[*dog] = Dog{pos: Position{row:row as i16, col:col as i16}, dir, active:true};
+                    *dog += 1
+                },
+                'C' => {self.cat = Cat::new(Position{row: row as i16, col: col as i16});}
                 _ => panic!()
                 }                
     }
@@ -236,14 +240,13 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn cat_at(&self) -> Position<WIDTH, HEIGHT>{
     self.cat.pos
     }
-    /* pub fn cat_icon(&self) -> char{
-        self.cat.icon()
-    } */
-    pub fn dog_at(&self, p: Position<WIDTH,HEIGHT>) -> /* Option<(usize,&Dog<WIDTH,HEIGHT>)> */ Position<WIDTH,HEIGHT>{
-        self.dogs.iter().enumerate().find(self.dog.pos == p)
+    pub fn dog_at(&self, p: Position<WIDTH,HEIGHT>) -> Option<(usize,&Dog<WIDTH,HEIGHT>)>{
+        self.dogs.iter().enumerate().find(|(_, dog)|dog.pos == p)
     }
     pub fn update(&mut self){
+        self.resolve_move();
         self.last_key = None;
+        self.cat.tick();
         self.update_dogs();
     }
     fn update_dogs(&mut self){
