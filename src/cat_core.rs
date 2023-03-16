@@ -20,11 +20,11 @@ enum Dir{
 
 impl Dir{
 
-    fn icon(&self) -> char {
+    /* fn icon(&self) -> char {
         match self {
             Dir::N | Dir::S | Dir::E | Dir::W => 'C'
         }
-    }
+    } */
 
     fn reverse(&self) -> Dir{
         match self{
@@ -54,7 +54,7 @@ impl Dir{
     }
 }
 
-impl From<char> for Dir {
+/* impl From<char> for Dir {
     fn from(icon: char) -> Self {
         match icon {
             'C' => Dir::S,
@@ -64,8 +64,8 @@ impl From<char> for Dir {
             _ => panic!("Illegal icon: '{}'", icon)
         }
     }
-}
-#[derive(PartialEq, Clone, Copy)]
+} */
+#[derive(PartialEq, Clone, Copy, Eq)]
 pub enum Cell {
     Fish,
     Empty,
@@ -112,24 +112,24 @@ impl <const WIDTH: usize, const HEIGHT: usize> Position<WIDTH, HEIGHT>{
 }
 
 
-//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 struct Cat<const WIDTH: usize, const HEIGHT: usize>{
-    pos: Position<WIDTH, HEIGHT>, dir: Dir, open: bool
+    pos: Position<WIDTH, HEIGHT>, dir: Dir
 }
 
 impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
-    fn new(pos: Position<WIDTH, HEIGHT>, icon:char) -> Self{
-        Cat {pos, dir: Dir::from(icon), open: true}
+    fn new(pos: Position<WIDTH, HEIGHT>) -> Self{
+        Cat {pos, dir: Dir::N}
     }
 
-    fn tick(&mut self) {
+    /*fn tick(&mut self) {
         self.open = !self.open;
-    }
-    fn icon(&self) -> char{
+    }*/
+    /* pub fn icon(&self) -> char{
         match self.dir {
             Dir::N | Dir::S | Dir::E | Dir::W => 'C'
         }
-    }
+    } */
 }
 
 
@@ -174,13 +174,13 @@ impl <const WIDTH: usize, const HEIGHT: usize> Dog<WIDTH,HEIGHT> {
         }
     }
 
-    pub fn icon(&self) -> char {
+    /* pub fn icon(&self) -> char {
         'D'
-    }
+    } */
 
 }
 
-//#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Status{
     Normal,
     Over
@@ -192,7 +192,7 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn new() -> Self{
         let mut game = CatGame{
             cells: [[Cell::Empty; WIDTH]; HEIGHT],
-            cat : Cat::new(Position{col: 0, row: 0},), //Need to put the icon there
+            cat : Cat::new(Position{col: 0, row: 0}), //Need to put the icon there
             dogs : [Dog{pos: Position {col:0, row: 0}, active: true, dir: Dir::E}; 2],
             fish_eaten: 0,
             countdown: UPDATE_FREQUENCY, last_key: None, status: Status::Normal
@@ -220,9 +220,9 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
 
     fn translate_icon(&mut self, dog : &mut usize, row: usize, col: usize, icon:char){
         match icon{
-                '#' => Cell::Wall,
-                'f' => Cell::Fish,
-                ' ' => Cell::Empty,
+                '#' => self.cells[row][col] = Cell::Wall,
+                'f' => self.cells[row][col] = Cell::Fish,
+                ' ' => self.cells[row][col] = Cell::Empty,
                 _ => panic!()
                 }                
     }
@@ -236,26 +236,24 @@ impl<const WIDTH:usize, const HEIGHT: usize> CatGame<WIDTH, HEIGHT>{
     pub fn cat_at(&self) -> Position<WIDTH, HEIGHT>{
     self.cat.pos
     }
-    pub fn cat_icon(&self) -> char{
+    /* pub fn cat_icon(&self) -> char{
         self.cat.icon()
-    }
-    pub fn dog_at(&self) -> Position<WIDTH,HEIGHT>{
+    } */
+    pub fn dog_at(&self, p: Position<WIDTH,HEIGHT>) -> Option<(usize,&Dog<WIDTH,HEIGHT>)>{
         self.dogs.iter().enumerate().find(|(_,dog)| dog.pos == p)
     }
     pub fn update(&mut self){
         self.last_key = None;
-        self.cat.tick();
-        self.empower_tick();
         self.update_dogs();
     }
     fn update_dogs(&mut self){
         for d in 0..self.dogs.len() {
             let (ahead, left, right) = self.ahead_left_right(self.dogs[d].pos, self.dogs[d].dir);
             self.resolve_dog_collision(d);
-            self.dogs[d].go(ahead, left, right, self.cat_pos);
+            self.dogs[d].go(ahead, left, right, self.cat_at());
             self.resolve_dog_collision(d);
             // make it so that the dogs randomly wander (Ferrer question)
-            self.resolve_dog_col(d);
+            self.resolve_dog_collision(d);
             }
         }
     fn resolve_dog_collision(&mut self, d:usize){
