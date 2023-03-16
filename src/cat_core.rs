@@ -113,16 +113,16 @@ impl <const WIDTH: usize, const HEIGHT: usize> Position<WIDTH, HEIGHT>{
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-struct Cat<const WIDTH: usize, const HEIGHT: usize>{
+pub struct Cat<const WIDTH: usize, const HEIGHT: usize>{
     pos: Position<WIDTH, HEIGHT>, dir: Dir
 }
 
 impl <const WIDTH:usize, const HEIGHT: usize> Cat<WIDTH,HEIGHT> {
-    fn new(pos: Position<WIDTH, HEIGHT>) -> Self{
+    pub fn new(pos: Position<WIDTH, HEIGHT>) -> Self{
         Cat {pos, dir: Dir::N}
     }
 
-    fn tick(&mut self) {
+    pub fn tick(&mut self) {
     }
     /* pub fn icon(&self) -> char{
         match self.dir {

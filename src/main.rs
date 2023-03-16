@@ -2,7 +2,7 @@
 #![no_main]
 
 mod cat_core;
-use catgame::MainGame;
+use catgame::{MainGame, cat_core::Cat};
 use cat_core::CatGame;
 use lazy_static::lazy_static;
 use spin::Mutex;
@@ -11,11 +11,11 @@ use pc_keyboard::DecodedKey;
 
 
 lazy_static!{
-    static ref GAME: Mutex<MainGame> = Mutex::new(CatGame::new());
+    static ref GAME: Mutex<MainGame> = Mutex::new(catgame::cat_core::CatGame::new());
 }
 
 fn tick(){
-    Cat::tick(&mut GAME.lock());
+    catgame::tick(&mut GAME.lock());
 }
 
 fn key(key: DecodedKey){

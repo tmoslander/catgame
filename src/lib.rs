@@ -7,7 +7,7 @@ use cat_core::Status;
 use cat_core::CatGame;
 use pluggable_interrupt_os::vga_buffer::clear_row;
 use pluggable_interrupt_os::vga_buffer::{BUFFER_WIDTH, BUFFER_HEIGHT, plot, ColorCode, Color, plot_num, plot_str};
-mod cat_core;
+pub mod cat_core;
 
 const GAME_HEIGHT: usize = BUFFER_HEIGHT-2;
 const HEADER_SPACE: usize = BUFFER_HEIGHT - GAME_HEIGHT;
